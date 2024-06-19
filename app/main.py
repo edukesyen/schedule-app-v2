@@ -60,7 +60,7 @@ async def read_form():
             </form>
             <div id="result"></div>
         </body>
-    </html>
+    </html> 
     """
 
 @app.post("/submit", response_class=HTMLResponse)
