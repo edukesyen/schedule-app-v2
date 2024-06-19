@@ -1,37 +1,47 @@
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse
-from datetime import datetime, timedelta
 
 app = FastAPI()
 
-def is_leap_year(year):
-    return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+def is_prime(n: int) -> bool:
+    if n <= 1:
+        return False
+    if n == 2:
+        return True
+    if n % 2 == 0:
+        return False
+    p = 3
+    while p * p <= n:
+        if n % p == 0:
+            return False
+        p += 2
+    return True
 
-def get_leap_years(start_date: datetime, end_date: datetime):
-    leap_years = []
-    for year in range(start_date.year, end_date.year + 1):
-        if is_leap_year(year):
-            leap_years.append(f"{year}")
-    return leap_years
+def get_prime_numbers(start_number: int, end_number: int):
+    prime_numbers = []
+    for num in range(start_number, end_number + 1):
+        if is_prime(num):
+            prime_numbers.append(str(num))
+    return prime_numbers
 
 @app.get("/", response_class=HTMLResponse)
 async def read_form():
     return """
     <html>
         <head>
-            <title>Identify Leap Years</title>
+            <title>Identify Prime Numbers</title>
             <script>
                 async function submitForm(event) {
                     event.preventDefault();
-                    const start_date = document.getElementById('start_date').value;
-                    const end_date = document.getElementById('end_date').value;
+                    const start_number = document.getElementById('start_number').value;
+                    const end_number = document.getElementById('end_number').value;
 
                     const response = await fetch("/submit", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/x-www-form-urlencoded",
                         },
-                        body: `start_date=${start_date}&end_date=${end_date}`,
+                        body: `start_number=${start_number}&end_number=${end_number}`,
                     });
 
                     const result = await response.text();
@@ -40,22 +50,23 @@ async def read_form():
             </script>
         </head>
         <body>
-            <h1>Identify Leap Years</h1>
+            <h1>Identify Prime Numbers</h1>
             <form onsubmit="submitForm(event)">
-                <label for="start_date">Start Date:</label>
-                <input type="date" id="start_date" name="start_date" required><br><br>
-                <label for="end_date">End Date:</label>
-                <input type="date" id="end_date" name="end_date" required><br><br>
+                <label for="start_number">Start Number:</label>
+                <input type="number" id="start_number" name="start_number" required><br><br>
+                <label for="end_number">End Number:</label>
+                <input type="number" id="end_number" name="end_number" required><br><br>
                 <button type="submit">Submit</button>
             </form>
             <div id="result"></div>
         </body>
-    </html>
+    </html> 
     """
 
 @app.post("/submit", response_class=HTMLResponse)
-async def submit_form(start_date: str = Form(...), end_date: str = Form(...)):
-    start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d")
-    leap_years = get_leap_years(start_date, end_date)
-    return "<br>".join(leap_years)
+async def submit_form(start_number: str = Form(...), end_number: str = Form(...)):
+    start_number = int(start_number)
+    end_number = int(end_number)
+    prime_numbers = get_prime_numbers(start_number, end_number)
+    return "<br>".join(prime_numbers)
+
