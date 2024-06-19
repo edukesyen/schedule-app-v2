@@ -39,8 +39,37 @@ async def read_form():
                     document.getElementById('result').innerHTML = result;
                 }
             </script>
+
         </head>
+        <body>
+            <h2>Input:</h2>
+            <form onsubmit="submitForm(event)">
+                <label for="start_date">Tanggal Awal:</label>
+                <input type="date" id="start_date" name="start_date"><br><br>
+                <label for="end_date">Tanggal Akhir:</label>
+                <input type="date" id="end_date" name="end_date"><br><br>
+                <input type="submit" value="Submit">
+            </form>
+            <div id="result"></div>
+        </body>
     </html>
     """
 
+@app.post("/submit", response_class=HTMLResponse)
+async def handle_form(start_date: str = Form(...), end_date: str = Form(...)):
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    weekend_dates = get_weekend_dates(start_date, end_date)
+    
+    result = "<h2>Output:</h2>"
+    result += f"<p>Hari Sabtu dan Minggu antara {start_date.strftime('%d %B %Y')} dan {end_date.strftime('%d %B %Y')}:</p>"
+    result += "<ul>"
+    for date in weekend_dates:
+        result += f"<li>{date}</li>"
+    result += "</ul>"
+    return result
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
